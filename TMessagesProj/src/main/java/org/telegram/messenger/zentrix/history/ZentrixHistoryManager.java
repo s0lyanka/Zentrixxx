@@ -311,7 +311,7 @@ public class ZentrixHistoryManager {
             return;
         }
 
-        if (!AndroidUtilities.isMainThread()) {
+        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
             final Context finalContext = context;
             AndroidUtilities.runOnUIThread(() -> showEditHistoryDialog(finalContext, currentAccount, dialogId, messageId));
             return;
@@ -373,12 +373,7 @@ public class ZentrixHistoryManager {
             TextView dateView = new TextView(context);
             dateView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             dateView.setTextColor(Theme.getColor(Theme.key_dialogTextGray2));
-            String formattedDate;
-            try {
-                formattedDate = LocaleController.formatDateTime(entry.date);
-            } catch (Throwable t) {
-                formattedDate = fallbackFormat.format(new Date(entry.date * 1000L));
-            }
+            String formattedDate = fallbackFormat.format(new Date(entry.date * 1000L));
             dateView.setText(" • " + formattedDate);
 
             headerLayout.addView(versionView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));

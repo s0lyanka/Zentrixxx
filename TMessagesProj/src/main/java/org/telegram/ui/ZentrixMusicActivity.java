@@ -130,7 +130,7 @@ public class ZentrixMusicActivity extends BaseFragment implements NotificationCe
             String msgArtist = msg != null ? msg.getMusicAuthor() : null;
             this.title = !TextUtils.isEmpty(msgTitle) ? msgTitle : "Audio Track";
             this.artist = !TextUtils.isEmpty(msgArtist) ? msgArtist : "Telegram Audio";
-            this.durationSec = msg != null ? msg.getDuration() : 0;
+            this.durationSec = msg != null ? (long) msg.getDuration() : 0;
         }
 
         public String getFormattedDuration() {
@@ -345,7 +345,7 @@ public class ZentrixMusicActivity extends BaseFragment implements NotificationCe
                         emptyView.setText("No local audio files found on device");
                         emptyView.showTextView();
                     } else {
-                        emptyView.hide();
+                        emptyView.setVisibility(View.GONE);
                     }
                 }
             });
@@ -376,14 +376,6 @@ public class ZentrixMusicActivity extends BaseFragment implements NotificationCe
             });
         });
 
-        // 2. Check local cached media in MediaDataController
-        try {
-            ArrayList<MessageObject> cached = MediaDataController.getInstance(currentAccount).getMediaShared(dialogId, MediaDataController.MEDIA_MUSIC);
-            if (cached != null && !cached.isEmpty()) {
-                onTelegramTracksLoaded(cached);
-            }
-        } catch (Throwable ignored) {
-        }
     }
 
     private void onTelegramTracksLoaded(ArrayList<MessageObject> messages) {
@@ -412,7 +404,7 @@ public class ZentrixMusicActivity extends BaseFragment implements NotificationCe
                 emptyView.setText("No music tracks found in this chat");
                 emptyView.showTextView();
             } else {
-                emptyView.hide();
+                emptyView.setVisibility(View.GONE);
             }
         }
     }
