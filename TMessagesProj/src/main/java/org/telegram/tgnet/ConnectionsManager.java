@@ -369,6 +369,14 @@ public class ConnectionsManager extends BaseController {
     }
 
     private void sendRequestInternal(TLObject object, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connectionType, boolean immediate, int requestToken) {
+        if (object instanceof org.telegram.messenger.zentrix.ghost.ZentrixGhostFilter.Bypass) {
+            object = ((org.telegram.messenger.zentrix.ghost.ZentrixGhostFilter.Bypass) object).getWrappedObject();
+        } else if (org.telegram.messenger.zentrix.ghost.ZentrixGhostFilter.shouldDrop(currentAccount, object)) {
+            if (onComplete != null) {
+                onComplete.run(new TLRPC.TL_boolTrue(), null);
+            }
+            return;
+        }
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("send request " + object + " with token = " + requestToken);
         }
