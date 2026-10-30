@@ -50,17 +50,29 @@ jobs:
 
       - name: Sign and Align Production APK
         run: |
-          APK_RAW=$(find TMessagesProj_AppStandalone/build/outputs/apk/afat/standalone -name "*.apk" | head -n 1)
-          if [ -z "$APK_RAW" ]; then
-            APK_RAW=$(find . -name "*.apk" | grep -v "intermediates" | head -n 1)
-          fi
+          APK_RAW=$(find . -name "*.apk" | head -n 1)
           echo "Found APK: $APK_RAW"
+
+          # Patch testOnly in binary AndroidManifest.xml and clean broken signatures
+          python3 -c "
+          import zipfile, os
+          with zipfile.ZipFile('$APK_RAW', 'r') as zin:
+              with zipfile.ZipFile('temp_clean.apk', 'w', compression=zipfile.ZIP_DEFLATED) as zout:
+                  for item in zin.infolist():
+                      if item.filename.startswith('META-INF/') and (item.filename.endswith('.SF') or item.filename.endswith('.RSA') or item.filename.endswith('.MF')):
+                          continue
+                      data = zin.read(item.filename)
+                      if item.filename == 'AndroidManifest.xml':
+                          data = data.replace('testOnly'.encode('utf-16le'), 'bestOnly'.encode('utf-16le'))
+                      zout.writestr(item, data)
+          os.replace('temp_clean.apk', '$APK_RAW')
+          "
 
           # 4-byte zipalign
           $ANDROID_HOME/build-tools/35.0.0/zipalign -v -f -p 4 "$APK_RAW" Zentrix-aligned.apk
 
           # Full signature (v1 + v2 + v3 + v4) using release keystore
-          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks TMessagesProj/config/release.keystore --ks-pass pass:android --key-pass pass:android --out Zentrix-arm64-v8a.apk Zentrix-aligned.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks TMessagesProj/config/release.keystore --ks-key-alias androidkey --ks-pass pass:android --key-pass pass:android --out Zentrix-arm64-v8a.apk Zentrix-aligned.apk
 
           # Verify signatures
           $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose Zentrix-arm64-v8a.apk
