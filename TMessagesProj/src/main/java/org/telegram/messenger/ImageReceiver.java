@@ -2515,16 +2515,18 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
 
     public void setRoundRadius(int[] value) {
         boolean changed = false;
-        int firstValue = value[0];
+        int maxRadius = org.telegram.messenger.zentrix.ZentrixConfig.useSquareStyle ? org.telegram.messenger.zentrix.ZentrixConfig.getCornerRadiusPx() : -1;
+        int firstValue = (maxRadius > 0 && value[0] > maxRadius) ? maxRadius : value[0];
         isRoundRect = true;
         for (int a = 0; a < roundRadius.length; a++) {
-            if (roundRadius[a] != value[a]) {
+            int targetVal = (maxRadius > 0 && value[a] > maxRadius) ? maxRadius : value[a];
+            if (roundRadius[a] != targetVal) {
                 changed = true;
             }
-            if (firstValue != value[a]) {
+            if (firstValue != targetVal) {
                 isRoundRect = false;
             }
-            roundRadius[a] = value[a];
+            roundRadius[a] = targetVal;
         }
         if (changed) {
             if (currentImageDrawable != null && imageShader == null) {
