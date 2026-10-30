@@ -1,0 +1,59 @@
+name: Build Zentrix APK
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          df -h
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup NDK and Build Tools
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.4.7075529" "build-tools;30.0.3" "build-tools;35.0.0" "platforms;android-35"
+          # Copy dx from 30.0.3 to 35.0.0 if required
+          cp $ANDROID_HOME/build-tools/30.0.3/dx $ANDROID_HOME/build-tools/35.0.0/dx 2>/dev/null || true
+          cp $ANDROID_HOME/build-tools/30.0.3/lib/dx.jar $ANDROID_HOME/build-tools/35.0.0/lib/dx.jar 2>/dev/null || true
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build Standalone APK
+        run: |
+          ./gradlew :TMessagesProj_AppStandalone:assembleAfatStandalone -x test --stacktrace --no-daemon
+        env:
+          GRADLE_OPTS: "-Xmx6g -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zentrix-Standalone-APK
+          path: |
+            TMessagesProj_AppStandalone/build/outputs/apk/**/*.apk
+            TMessagesProj_App/build/outputs/apk/**/*.apk
+          retention-days: 14
