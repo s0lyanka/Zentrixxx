@@ -52,7 +52,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Zentrix-ARM64-APK
-          path: |
-            TMessagesProj_AppStandalone/build/outputs/apk/**/*.apk
-            TMessagesProj_App/build/outputs/apk/**/*.apk
+          path: "**/*.apk"
           retention-days: 14
