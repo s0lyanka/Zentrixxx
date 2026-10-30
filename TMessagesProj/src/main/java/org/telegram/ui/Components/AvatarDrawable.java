@@ -592,7 +592,13 @@ public class AvatarDrawable extends Drawable {
                 AndroidUtilities.rectTmp.set(0, 0, size, size);
                 canvas.drawRoundRect(AndroidUtilities.rectTmp, roundRadius, roundRadius, backgroundPaint);
             } else {
+                if (org.telegram.messenger.zentrix.ZentrixConfig.useSquareStyle) {
+                int r = org.telegram.messenger.zentrix.ZentrixConfig.getCornerRadiusPx();
+                AndroidUtilities.rectTmp.set(0, 0, size, size);
+                canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, backgroundPaint);
+            } else {
                 canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f, backgroundPaint);
+            }
             }
             if (rotate45Background) {
                 canvas.restore();
