@@ -44,13 +44,30 @@ jobs:
 
       - name: Fast Build ARM64 APK
         run: |
-          ./gradlew :TMessagesProj_AppStandalone:assembleAfatStandalone -Pandroid.injected.build.abi=arm64-v8a -x test --stacktrace
+          ./gradlew :TMessagesProj_AppStandalone:assembleAfatStandalone -Pandroid.injected.build.abi=arm64-v8a -Pandroid.injected.testOnly=false -x test --stacktrace
         env:
           GRADLE_OPTS: "-Xmx6g -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
+
+      - name: Sign and Align Production APK
+        run: |
+          APK_RAW=$(find TMessagesProj_AppStandalone/build/outputs/apk/afat/standalone -name "*.apk" | head -n 1)
+          if [ -z "$APK_RAW" ]; then
+            APK_RAW=$(find . -name "*.apk" | grep -v "intermediates" | head -n 1)
+          fi
+          echo "Found APK: $APK_RAW"
+
+          # 4-byte zipalign
+          $ANDROID_HOME/build-tools/35.0.0/zipalign -v -f -p 4 "$APK_RAW" Zentrix-aligned.apk
+
+          # Full signature (v1 + v2 + v3 + v4) using release keystore
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks TMessagesProj/config/release.keystore --ks-pass pass:android --key-pass pass:android --out Zentrix-arm64-v8a.apk Zentrix-aligned.apk
+
+          # Verify signatures
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose Zentrix-arm64-v8a.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Zentrix-ARM64-APK
-          path: "**/*.apk"
+          path: "Zentrix-arm64-v8a.apk"
           retention-days: 14
