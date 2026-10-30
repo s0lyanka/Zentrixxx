@@ -9,10 +9,9 @@ import android.provider.MediaStore;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.SendMessagesHelper;
-import org.telegram.tgnet.TLRPC;
 
 import java.util.ArrayList;
 
@@ -52,17 +51,20 @@ public class ZentrixMusicManager {
      * Loads audio tracks from any specified Telegram dialog (channel, group, or saved messages).
      */
     public static void loadTracksFromChat(int currentAccount, long dialogId, int count, MusicCallback callback) {
-        MessagesStorage.getInstance(currentAccount).getStorageQueue().postRunnable(() -> {
+        AndroidUtilities.runOnUIThread(() -> {
             try {
-                // Query media storage for audio type (MEDIA_AUDIO = 1)
-                MessagesStorage.getInstance(currentAccount).loadMedia(
+                MediaDataController.getInstance(currentAccount).loadMedia(
                         dialogId,
-                        0,      // offset
-                        count > 0 ? count : 100, // count
-                        0,      // max_id
-                        MessagesStorage.MEDIA_AUDIO,
-                        0,      // classGuid
-                        false   // loadFromCacheOnly
+                        count > 0 ? count : 100,
+                        0, // max_id
+                        0, // min_id
+                        MediaDataController.MEDIA_MUSIC,
+                        0L, // topicId
+                        0, // fromCache
+                        0, // classGuid
+                        0, // requestIndex
+                        null, // tag
+                        null // query
                 );
             } catch (Exception e) {
                 FileLog.e(TAG + ": Failed to load chat audio", e);
@@ -127,7 +129,7 @@ public class ZentrixMusicManager {
                 batch.add(audioMessages.get(i));
                 // Forward in batches of 50 (Telegram MTProto limit)
                 if (batch.size() == 50 || i == audioMessages.size() - 1) {
-                    helper.sendMessage(new ArrayList<>(batch), targetDialogId, false, false, true, 0, 0);
+                    helper.sendMessage(new ArrayList<>(batch), targetDialogId, false, false, true, 0, 0L);
                     if (callback != null) {
                         callback.onProgress(i + 1, audioMessages.size());
                     }

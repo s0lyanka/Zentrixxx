@@ -1,84 +1,81 @@
 package org.telegram.messenger.zentrix.proxy;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.text.TextUtils;
 
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.zentrix.ZentrixConfig;
+import org.telegram.tgnet.ConnectionsManager;
 
-/**
- * Manages VLESS and Hysteria 2 proxy configurations for internal Telegram bypass without requiring system VPN permissions.
- */
+import java.util.HashMap;
+import java.util.Map;
+
 public class ZentrixProxyManager {
 
     private static final String TAG = "ZentrixProxyManager";
 
     public static class ProxyConfig {
-        public String type; // VLESS, HYSTERIA2
-        public String host;
+        public String protocol; // vless or hysteria2
+        public String server;
         public int port;
-        public String auth; // UUID or Password
-        public String sni;
-        public String publicKey;
-        public String shortId;
-        public String rawUri;
+        public String uuid;     // password / uuid
+        public Map<String, String> params = new HashMap<>();
 
-        public boolean isValid() {
-            return !TextUtils.isEmpty(host) && port > 0;
+        @Override
+        public String toString() {
+            return protocol + "://" + server + ":" + port;
         }
     }
 
-    /**
-     * Parses standard VLESS or Hysteria 2 subscription link.
-     */
     public static ProxyConfig parseConfig(String uriString) {
-        if (TextUtils.isEmpty(uriString)) return null;
-
+        if (TextUtils.isEmpty(uriString)) {
+            return null;
+        }
         try {
             Uri uri = Uri.parse(uriString.trim());
-            String scheme = uri.getScheme();
-            if (scheme == null) return null;
-
             ProxyConfig config = new ProxyConfig();
-            config.rawUri = uriString.trim();
-            config.host = uri.getHost();
-            config.port = uri.getPort();
+            config.protocol = uri.getScheme();
+            config.server = uri.getHost();
+            config.port = uri.getPort() > 0 ? uri.getPort() : 443;
+            config.uuid = uri.getUserInfo();
 
-            if (scheme.equalsIgnoreCase("vless")) {
-                config.type = ZentrixConfig.VPN_TYPE_VLESS;
-                config.auth = uri.getUserInfo();
-                config.sni = uri.getQueryParameter("sni");
-                config.publicKey = uri.getQueryParameter("pbk");
-                config.shortId = uri.getQueryParameter("sid");
-            } else if (scheme.equalsIgnoreCase("hy2") || scheme.equalsIgnoreCase("hysteria2")) {
-                config.type = ZentrixConfig.VPN_TYPE_HYSTERIA2;
-                config.auth = uri.getUserInfo();
-                config.sni = uri.getQueryParameter("sni");
+            if (uri.getQuery() != null) {
+                for (String param : uri.getQuery().split("&")) {
+                    String[] pair = param.split("=");
+                    if (pair.length == 2) {
+                        config.params.put(pair[0], pair[1]);
+                    }
+                }
             }
-
-            return config.isValid() ? config : null;
+            return config;
         } catch (Exception e) {
-            FileLog.e(TAG + ": Failed to parse proxy URI", e);
+            FileLog.e(TAG + ": Failed to parse proxy URI " + uriString, e);
             return null;
         }
     }
 
-    /**
-     * Enables or disables internal bypass proxy for Telegram traffic.
-     */
     public static void setBypassEnabled(boolean enable) {
         ZentrixConfig.setVpnEnabled(enable);
+        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("proxy_enabled", enable);
+
         if (enable) {
-            ProxyConfig config = parseConfig(ZentrixConfig.vpnConfigUrl);
-            if (config != null) {
-                // Route Telegram through local proxy endpoint (default 127.0.0.1:10808)
-                SharedConfig.ProxyInfo proxy = SharedConfig.addProxy(new SharedConfig.ProxyInfo("127.0.0.1", 10808, "", "", ""));
-                SharedConfig.currentProxy = proxy;
-                SharedConfig.setProxyEnable(true);
-            }
+            SharedConfig.ProxyInfo proxy = SharedConfig.addProxy(new SharedConfig.ProxyInfo("127.0.0.1", 10808, "", "", ""));
+            SharedConfig.currentProxy = proxy;
+            editor.putString("proxy_ip", "127.0.0.1");
+            editor.putInt("proxy_port", 10808);
+            editor.putString("proxy_user", "");
+            editor.putString("proxy_pass", "");
+            editor.putString("proxy_secret", "");
+            editor.apply();
+            ConnectionsManager.setProxySettings(true, "127.0.0.1", 10808, "", "", "");
         } else {
-            SharedConfig.setProxyEnable(false);
+            editor.apply();
+            ConnectionsManager.setProxySettings(false, "", 1080, "", "", "");
         }
     }
 }

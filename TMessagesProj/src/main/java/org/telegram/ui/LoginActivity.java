@@ -3600,53 +3600,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         private String lastError = "";
 
         @AuthType
-            private void showBotTokenLoginDialog() {
-        if (getParentActivity() == null) return;
-        org.telegram.ui.ActionBar.AlertDialog.Builder builder = new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity());
-        builder.setTitle("Bot Token Login");
-        builder.setMessage("Enter your Telegram Bot Token from @BotFather:");
-
-        final org.telegram.ui.Components.EditTextBoldCursor input = new org.telegram.ui.Components.EditTextBoldCursor(getParentActivity());
-        input.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
-        input.setHint("123456789:AA...");
-        input.setTextColor(org.telegram.ui.ActionBar.Theme.getColor(org.telegram.ui.ActionBar.Theme.key_dialogTextBlack));
-        input.setHintTextColor(org.telegram.ui.ActionBar.Theme.getColor(org.telegram.ui.ActionBar.Theme.key_dialogTextHint));
-        input.setBackground(org.telegram.ui.ActionBar.Theme.createEditTextDrawable(getParentActivity(), false));
-
-        android.widget.FrameLayout container = new android.widget.FrameLayout(getParentActivity());
-        container.setPadding(org.telegram.messenger.AndroidUtilities.dp(24), org.telegram.messenger.AndroidUtilities.dp(8), org.telegram.messenger.AndroidUtilities.dp(24), org.telegram.messenger.AndroidUtilities.dp(8));
-        container.addView(input, org.telegram.ui.Components.LayoutHelper.createFrame(org.telegram.ui.Components.LayoutHelper.MATCH_PARENT, org.telegram.ui.Components.LayoutHelper.WRAP_CONTENT));
-        builder.setView(container);
-
-        builder.setPositiveButton("Log In", (dialog, which) -> {
-            String botToken = input.getText().toString().trim();
-            if (android.text.TextUtils.isEmpty(botToken)) return;
-            org.telegram.ui.ActionBar.AlertDialog progress = new org.telegram.ui.ActionBar.AlertDialog(getParentActivity(), 3);
-            progress.show();
-            org.telegram.messenger.zentrix.bot.BotAuthHelper.loginWithBotToken(currentAccount, botToken, new org.telegram.messenger.zentrix.bot.BotAuthHelper.BotAuthCallback() {
-                @Override
-                public void onSuccess(org.telegram.tgnet.TLRPC.User user) {
-                    progress.dismiss();
-                }
-
-                @Override
-                public void onError(int errorCode, String errorMessage) {
-                    progress.dismiss();
-                    if (getParentActivity() != null) {
-                        new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
-                            .setTitle("Error")
-                            .setMessage(errorMessage)
-                            .setPositiveButton("OK", null)
-                            .show();
-                    }
-                }
-            });
-        });
-        builder.setNegativeButton("Cancel", null);
-        showDialog(builder.create());
-    }
-
-    private int currentType;
+            private int currentType;
         @AuthType
         private int nextType;
         @AuthType
@@ -10368,4 +10322,51 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         clearSheets();
         parentLayout = null;
     }
+
+    public void showBotTokenLoginDialog() {
+        if (getParentActivity() == null) return;
+        org.telegram.ui.ActionBar.AlertDialog.Builder builder = new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity());
+        builder.setTitle("Bot Token Login");
+        builder.setMessage("Enter your Telegram Bot Token from @BotFather:");
+
+        final org.telegram.ui.Components.EditTextBoldCursor input = new org.telegram.ui.Components.EditTextBoldCursor(getParentActivity());
+        input.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
+        input.setHint("123456789:AA...");
+        input.setTextColor(org.telegram.ui.ActionBar.Theme.getColor(org.telegram.ui.ActionBar.Theme.key_dialogTextBlack));
+        input.setHintTextColor(org.telegram.ui.ActionBar.Theme.getColor(org.telegram.ui.ActionBar.Theme.key_dialogTextHint));
+        input.setBackground(org.telegram.ui.ActionBar.Theme.createEditTextDrawable(getParentActivity(), false));
+
+        android.widget.FrameLayout container = new android.widget.FrameLayout(getParentActivity());
+        container.setPadding(org.telegram.messenger.AndroidUtilities.dp(24), org.telegram.messenger.AndroidUtilities.dp(8), org.telegram.messenger.AndroidUtilities.dp(24), org.telegram.messenger.AndroidUtilities.dp(8));
+        container.addView(input, org.telegram.ui.Components.LayoutHelper.createFrame(org.telegram.ui.Components.LayoutHelper.MATCH_PARENT, org.telegram.ui.Components.LayoutHelper.WRAP_CONTENT));
+        builder.setView(container);
+
+        builder.setPositiveButton("Log In", (dialog, which) -> {
+            String botToken = input.getText().toString().trim();
+            if (android.text.TextUtils.isEmpty(botToken)) return;
+            org.telegram.ui.ActionBar.AlertDialog progress = new org.telegram.ui.ActionBar.AlertDialog(getParentActivity(), 3);
+            progress.show();
+            org.telegram.messenger.zentrix.bot.BotAuthHelper.loginWithBotToken(currentAccount, botToken, new org.telegram.messenger.zentrix.bot.BotAuthHelper.BotAuthCallback() {
+                @Override
+                public void onSuccess(org.telegram.tgnet.TLRPC.User user) {
+                    progress.dismiss();
+                }
+
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+                    progress.dismiss();
+                    if (getParentActivity() != null) {
+                        new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
+                            .setTitle("Error")
+                            .setMessage(errorMessage)
+                            .setPositiveButton("OK", null)
+                            .show();
+                    }
+                }
+            });
+        });
+        builder.setNegativeButton("Cancel", null);
+        showDialog(builder.create());
+    }
+
 }

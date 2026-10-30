@@ -3827,8 +3827,8 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             }
             sendMessageParams.message = modified;
         }
-        if (org.telegram.messenger.zentrix.ZentrixConfig.useScheduledSending && sendMessageParams != null && sendMessageParams.schedule_date == 0) {
-            sendMessageParams.schedule_date = org.telegram.tgnet.ConnectionsManager.getInstance(currentAccount).getCurrentTime() + 1;
+        if (org.telegram.messenger.zentrix.ZentrixConfig.useScheduledSending && sendMessageParams != null && sendMessageParams.scheduleDate == 0) {
+            sendMessageParams.scheduleDate = org.telegram.tgnet.ConnectionsManager.getInstance(currentAccount).getCurrentTime() + 1;
         }
         String message = sendMessageParams.message;
         String caption = sendMessageParams.caption;

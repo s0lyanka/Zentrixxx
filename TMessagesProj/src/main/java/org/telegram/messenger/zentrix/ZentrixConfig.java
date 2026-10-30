@@ -74,12 +74,12 @@ public class ZentrixConfig {
     // ==========================================
     // 5. Music Player Settings
     // ==========================================
-    public static boolean autoPlayNext = true;
-    public static int sourceFilter = SOURCE_FILTER_CHATS;
-
     public static final int SOURCE_FILTER_CHATS = 0;
     public static final int SOURCE_FILTER_LOCAL = 1;
     public static final int SOURCE_FILTER_SAVED = 2;
+
+    public static boolean autoPlayNext = true;
+    public static int sourceFilter = SOURCE_FILTER_CHATS;
 
     // Keys
     private static final String KEY_AUTO_PLAY_NEXT = "auto_play_next";
@@ -88,12 +88,12 @@ public class ZentrixConfig {
     // ==========================================
     // 6. VPN Settings
     // ==========================================
+    public static final String VPN_TYPE_VLESS = "VLESS";
+    public static final String VPN_TYPE_HYSTERIA2 = "HYSTERIA2";
+
     public static boolean vpnEnabled = false;
     public static String vpnType = VPN_TYPE_VLESS;
     public static String vpnConfigUrl = "";
-
-    public static final String VPN_TYPE_VLESS = "VLESS";
-    public static final String VPN_TYPE_HYSTERIA2 = "HYSTERIA2";
 
     // Keys
     private static final String KEY_VPN_ENABLED = "vpn_enabled";

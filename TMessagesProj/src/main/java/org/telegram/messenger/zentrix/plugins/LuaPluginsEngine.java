@@ -151,22 +151,7 @@ public class LuaPluginsEngine {
                     try {
                         int account = UserConfig.selectedAccount;
                         SendMessagesHelper helper = SendMessagesHelper.getInstance(account);
-                        SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(
-                                text,
-                                dialogId,
-                                null, // reply_to_msg
-                                null, // reply_to_story_item
-                                null, // entities
-                                null, // webPage
-                                true, // notify
-                                null, // reply_markup
-                                null, // schedule_date
-                                null, // schedule_date_random
-                                true, // clear_draft
-                                0,    // invert_media
-                                null, // quick_reply_shortcut
-                                false // effect_id
-                        );
+                        SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(text, dialogId);
                         helper.sendMessage(params);
                     } catch (Throwable t) {
                         FileLog.e(TAG + ": Error in tg.send", t);

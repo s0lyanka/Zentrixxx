@@ -3,11 +3,7 @@ package org.telegram.messenger.zentrix.ghost;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.zentrix.ZentrixConfig;
 import org.telegram.tgnet.TLObject;
-import org.telegram.tgnet.TLRPC;
 
-/**
- * Intercepts MTProto packets before transmission to implement Ghost Mode features.
- */
 public class ZentrixGhostFilter {
 
     private static final String TAG = "ZentrixGhostFilter";
@@ -33,41 +29,39 @@ public class ZentrixGhostFilter {
             return false;
         }
 
-        // 1. Hide read receipts for messages
-        if (request instanceof TLRPC.TL_messages_readHistory 
-                || request instanceof TLRPC.TL_messages_readDiscussion
-                || request instanceof TLRPC.TL_channels_readHistory) {
+        String name = request.getClass().getName();
+
+        if (name.contains("readHistory") || name.contains("readDiscussion") || name.contains("ReadHistory")) {
             if (ZentrixConfig.hideRead || ZentrixConfig.isGhostMode) {
-                FileLog.d(TAG + ": Dropped readHistory packet in Ghost Mode");
+                FileLog.d(TAG + ": Dropped " + name + " in Ghost Mode");
                 return true;
             }
         }
 
-        // 2. Hide story read receipts
-        if (request.getClass().getSimpleName().contains("readStories")
-                || request instanceof TLRPC.TL_stories_readStories) {
+        if (name.contains("readStories") || name.contains("ReadStories")) {
             if (ZentrixConfig.hideStories || ZentrixConfig.isGhostMode) {
-                FileLog.d(TAG + ": Dropped readStories packet in Ghost Mode");
+                FileLog.d(TAG + ": Dropped " + name + " in Ghost Mode");
                 return true;
             }
         }
 
-        // 3. Hide typing / upload progress
-        if (request instanceof TLRPC.TL_messages_setTyping) {
+        if (name.contains("setTyping") || name.contains("SetTyping")) {
             if (ZentrixConfig.hideTyping || ZentrixConfig.isGhostMode) {
-                FileLog.d(TAG + ": Dropped setTyping packet in Ghost Mode");
+                FileLog.d(TAG + ": Dropped " + name + " in Ghost Mode");
                 return true;
             }
         }
 
-        // 4. Hide online status packets
-        if (request instanceof TLRPC.TL_account_updateStatus) {
-            TLRPC.TL_account_updateStatus statusReq = (TLRPC.TL_account_updateStatus) request;
-            if (statusReq.offline) {
-                return false;
-            }
+        if (name.contains("updateStatus") || name.contains("UpdateStatus")) {
+            try {
+                java.lang.reflect.Field f = request.getClass().getField("offline");
+                if (f.getBoolean(request)) {
+                    return false;
+                }
+            } catch (Throwable ignored) {}
+
             if (ZentrixConfig.isGhostMode) {
-                FileLog.d(TAG + ": Dropped updateStatus(online) packet in Ghost Mode");
+                FileLog.d(TAG + ": Dropped updateStatus online in Ghost Mode");
                 return true;
             }
         }
