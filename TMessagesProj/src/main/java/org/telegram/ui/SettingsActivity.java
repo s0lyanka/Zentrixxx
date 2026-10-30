@@ -676,6 +676,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             items.add(UItem.asShadow(null));
         }
 
+        items.add(SettingCell.Factory.of(1001, 0xFF9C27B0, 0xFF7B1FA2, R.drawable.settings_features, "Zentrix Mod Settings", "Ghost mode, Anti-delete, VPN & Plugins"));
+        items.add(SettingCell.Factory.of(1002, 0xFFE91E63, 0xFFC2185B, R.drawable.settings_sounds, "Zentrix Music Player", "Multi-source audio & batch forward"));
         items.add(SettingCell.Factory.of(1, 0xFF1CA5ED, 0xFF1488E1, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
         items.add(SettingCell.Factory.of(2, 0xFFF09F1B, 0xFFE18A11, R.drawable.settings_chat, getString(R.string.SettingsChat), getString(R.string.SettingsChatInfo)));
         items.add(SettingCell.Factory.of(3, 0xFF55CA47, 0xFF27B434, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity), getString(R.string.SettingsPrivacySecurityInfo)));
@@ -750,6 +752,12 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             return;
         }
         switch (item.id) {
+            case 1001:
+                presentFragment(new ZentrixSettingsActivity());
+                break;
+            case 1002:
+                presentFragment(new ZentrixMusicActivity());
+                break;
             case 1:
                 presentFragment(new UserInfoActivity());
                 break;

@@ -17467,6 +17467,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 currentTimeString = TextUtils.concat(formatString(R.string.MessageScheduledRepeatSeconds, period), ", ", currentTimeString);
             }
         }
+        if (currentMessageObject != null && org.telegram.messenger.zentrix.history.ZentrixHistoryManager.isDeleted(currentAccount, currentMessageObject.getDialogId(), currentMessageObject.getId())) {
+            currentTimeString = android.text.TextUtils.concat("[DELETED] ", currentTimeString);
+        }
         timeTextWidth = timeWidth = (int) Math.ceil(Theme.chat_timePaint.measureText(currentTimeString, 0, currentTimeString == null ? 0 : currentTimeString.length()));
         if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE || currentMessageObject.notime) {
             timeWidth -= dp(8);

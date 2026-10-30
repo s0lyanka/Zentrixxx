@@ -3433,6 +3433,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else {
             if (searchString != null || folderId != 0) {
                 actionBar.setBackButtonDrawable(backDrawable = new BackDrawable(false));
+            } else if (org.telegram.messenger.zentrix.ZentrixConfig.useClassicDrawer) {
+                actionBar.setBackButtonDrawable(new MenuDrawable());
             }
             if (folderId != 0) {
                 actionBar.setTitle(getString(R.string.ArchivedChats));
@@ -3827,6 +3829,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         }
                     } else if (onlySelect || folderId != 0) {
                         finishFragment();
+                    } else if (org.telegram.messenger.zentrix.ZentrixConfig.useClassicDrawer) {
+                        presentFragment(new org.telegram.ui.ZentrixSettingsActivity());
                     }
                 } else if (id == 1) {
                     if (getParentActivity() == null) {

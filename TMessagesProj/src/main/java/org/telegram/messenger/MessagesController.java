@@ -18452,6 +18452,10 @@ public class MessagesController extends BaseController implements NotificationCe
 
                 ImageLoader.saveMessageThumbs(message);
                 AndroidUtilities.runOnUIThread(()-> getSendMessagesHelper().onMessageEdited(message));
+                MessageObject oldMsg = dialogMessagesByIds.get(message.id);
+                if (oldMsg != null && oldMsg.messageOwner != null) {
+                    org.telegram.messenger.zentrix.history.ZentrixHistoryManager.onMessageEdited(currentAccount, message.dialog_id, message.id, oldMsg.messageOwner.message, oldMsg.messageOwner.date, oldMsg.messageOwner.entities);
+                }
 
                 boolean isDialogCreated = createdDialogIds.contains(message.dialog_id);
                 MessageObject obj = new MessageObject(currentAccount, message, usersDict, chatsDict, isDialogCreated, isDialogCreated);

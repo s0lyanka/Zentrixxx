@@ -1116,6 +1116,7 @@ public class ChatActivity extends BaseFragment implements
     private boolean switchingFromTopics;
     private float switchingFromTopicsProgress;
 
+    public final static int OPTION_ZENTRIX_EDIT_HISTORY = 9988;
     public final static int OPTION_RETRY = 0;
     public final static int OPTION_DELETE = 1;
     public final static int OPTION_FORWARD = 2;
@@ -29739,6 +29740,12 @@ public class ChatActivity extends BaseFragment implements
             ArrayList<Integer> icons = new ArrayList<>();
             ArrayList<CharSequence> items = new ArrayList<>();
             final ArrayList<Integer> options = new ArrayList<>();
+
+            if (message != null && org.telegram.messenger.zentrix.history.ZentrixHistoryManager.hasEditHistory(currentAccount, message.getDialogId(), message.getId())) {
+                items.add("Edit History");
+                options.add(OPTION_ZENTRIX_EDIT_HISTORY);
+                icons.add(R.drawable.group_edit);
+            }
             View optionsView = null;
 
             if (AndroidUtilities.isAccessibilityScreenReaderEnabled() && message.messageOwner != null && message.messageOwner.from_id != null && message.messageOwner.from_id.user_id != getUserConfig().clientUserId && chatMode != MODE_SAVED) {
@@ -31915,6 +31922,10 @@ public class ChatActivity extends BaseFragment implements
         }
         boolean preserveDim = false;
         switch (option) {
+            case OPTION_ZENTRIX_EDIT_HISTORY: {
+                org.telegram.messenger.zentrix.history.ZentrixHistoryManager.showEditHistoryDialog(getParentActivity(), currentAccount, selectedObject.getDialogId(), selectedObject.getId());
+                break;
+            }
             case OPTION_RETRY: {
                 final MessageObject object = selectedObject;
                 final MessageObject.GroupedMessages group = selectedObjectGroup;

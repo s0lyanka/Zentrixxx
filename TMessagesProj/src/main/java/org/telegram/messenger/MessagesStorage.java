@@ -14254,6 +14254,10 @@ public class MessagesStorage extends BaseController {
         if (messages.isEmpty()) {
             return null;
         }
+        org.telegram.messenger.zentrix.history.ZentrixHistoryManager.hookStorageDelete(currentAccount, dialogId, messages);
+        if (messages.isEmpty()) {
+            return null;
+        }
         if (useQueue) {
             storageQueue.postRunnable(() -> markMessagesAsDeletedInternal(dialogId, messages, deleteFiles, mode, topicId));
         } else {

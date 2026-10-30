@@ -1464,6 +1464,14 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         return null;
     }
 
+    @Override
+    public boolean fling(int velocityX, int velocityY) {
+        if (org.telegram.messenger.zentrix.ZentrixConfig.smoothScroll) {
+            velocityY = (int) (velocityY * 0.75f);
+        }
+        return super.fling(velocityX, velocityY);
+    }
+
     public RecyclerListView(Context context) {
         this(context, null);
     }
